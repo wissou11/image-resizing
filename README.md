@@ -73,7 +73,7 @@ $$E(x,y) = \left| \frac{\partial I}{\partial x} \right| + \left| \frac{\partial 
 
 In practice, the derivatives are approximated using finite differences.
 
-![Energy map for bird image](energy_map.png)
+![Energy map for bird image](energy_map.png) 
 *Figure 1: Energy map obtained using image gradients for a bird image*
 
 ![Energy map for giraffe image](energy_map1.png)
