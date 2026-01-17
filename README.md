@@ -38,27 +38,21 @@ The objective of this project is to implement the Seam Carving algorithm and dem
 
 ## Problem Definition
 
-Given an image of height *H* and width *W*, the goal is to reduce its width while preserving the most important visual structures.
+Given an image of height $H$ and width $W$, the goal is to reduce its width while preserving the most important visual structures.
 
 A **vertical seam** is defined as a connected path of pixels:
 
-```
-S = {(x_y, y) | y = 0, 1, ..., H-1}
-```
+$$S = \{(x_y, y) \mid y = 0,1,\dots,H-1\}$$
 
 subject to:
 
-```
-|x_y - x_{y-1}| ≤ 1
-```
+$$|x_y - x_{y-1}| \leq 1$$
 
 Each seam contains exactly one pixel per image row.
 
 The optimal seam is the one minimizing the total energy:
 
-```
-E(S) = Σ E(x_y, y) for y = 0 to H-1
-```
+$$E(S) = \sum_{y=0}^{H-1} E(x_y, y)$$
 
 ---
 
@@ -75,9 +69,7 @@ The importance of a pixel is measured using an energy function.
 
 The energy is computed from the image gradient:
 
-```
-E(x,y) = |∂I/∂x| + |∂I/∂y|
-```
+$$E(x,y) = \left| \frac{\partial I}{\partial x} \right| + \left| \frac{\partial I}{\partial y} \right|$$
 
 In practice, the derivatives are approximated using finite differences.
 
@@ -93,13 +85,16 @@ The image is modeled as a directed acyclic graph (DAG).
 
 ### Graph Construction
 
-- Each pixel (x,y) represents a node.
-- Directed edges connect a pixel to its three neighbors in the next row: (x-1, y+1), (x, y+1), (x+1, y+1)
+- Each pixel $(x,y)$ represents a node.
+- Directed edges connect a pixel to its three neighbors in the next row:
+  
+  $$(x-1,y+1),\ (x,y+1),\ (x+1,y+1)$$
+  
 - The weight of each edge is the energy of the destination pixel.
 
 ### Acyclic Property
 
-Edges only go from row *y* to row *y+1*, therefore cycles are impossible. The graph is naturally a DAG.
+Edges only go from row $y$ to row $y+1$, therefore cycles are impossible. The graph is naturally a DAG.
 
 ---
 
@@ -113,16 +108,14 @@ Because the graph is acyclic, the shortest path can be computed efficiently usin
 
 ## Dynamic Programming Approach
 
-Let M(x,y) be the minimum cumulative energy required to reach pixel (x,y).
+Let $M(x,y)$ be the minimum cumulative energy required to reach pixel $(x,y)$.
 
-```
-M(x,y) = E(x,y) + min(M(x-1, y-1), M(x, y-1), M(x+1, y-1))
-```
+$$M(x,y) = E(x,y) + \min \begin{cases} M(x-1,y-1) \\ M(x,y-1) \\ M(x+1,y-1) \end{cases}$$
 
 ### Algorithm Steps
 
 1. Compute the energy map.
-2. Initialize the first row of M.
+2. Initialize the first row of $M$.
 3. Fill the matrix row by row.
 4. Find the minimum value in the last row.
 5. Backtrack to extract the seam.
@@ -170,21 +163,17 @@ The process can be repeated multiple times to achieve the desired width.
 
 For removing a single seam:
 
-- Energy computation: O(HW)
-- Dynamic programming: O(HW)
-- Seam removal: O(HW)
+- Energy computation: $O(HW)$
+- Dynamic programming: $O(HW)$
+- Seam removal: $O(HW)$
 
-Removing *k* seams has complexity:
+Removing $k$ seams has complexity:
 
-```
-O(kHW)
-```
+$$O(kHW)$$
 
 Memory complexity is:
 
-```
-O(HW)
-```
+$$O(HW)$$
 
 ---
 
