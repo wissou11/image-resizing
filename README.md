@@ -1,246 +1,228 @@
-# 🧵 Seam Carving for Content-Aware Image Resizing  
-**Application of Graph Theory in Image Processing**
+# Seam Carving for Content-Aware Image Resizing
+## Application of Graph Theory in Image Processing
+
+**Author:** Wissem Bahrouni  
+**Date:** January 17, 2026
 
 ---
 
-## 📌 Overview
+## Table of Contents
 
-Traditional image resizing techniques (uniform scaling or cropping) treat all pixels equally.  
-This often leads to distortion of important visual content such as people, animals, or buildings.
-
-**Seam Carving** is a content-aware image resizing algorithm introduced by  
-**Avidan & Shamir (2007)**. Instead of resizing the whole image uniformly, it removes connected paths of pixels with **low visual importance**, preserving meaningful structures.
-
-This project implements the Seam Carving algorithm from scratch and demonstrates how:
-
-- graph theory  
-- shortest path algorithms  
-- dynamic programming  
-
-can be applied to real-world image processing problems.
-
----
-
-## 🎯 Objectives
-
-- Implement seam carving without external computer vision libraries  
-- Model the image as a **Directed Acyclic Graph (DAG)**  
-- Use **dynamic programming** to compute shortest paths  
-- Visualize:
-  - energy maps
-  - optimal seams
-  - before / after resizing results  
-- Provide an interactive Streamlit interface
+1. [Introduction](#introduction)
+2. [Problem Definition](#problem-definition)
+3. [Energy Map](#energy-map)
+4. [Graph Representation](#graph-representation)
+5. [Shortest Path Formulation](#shortest-path-formulation)
+6. [Dynamic Programming Approach](#dynamic-programming-approach)
+7. [Seam Extraction](#seam-extraction)
+8. [Seam Removal](#seam-removal)
+9. [Complexity Analysis](#complexity-analysis)
+10. [Results and Discussion](#results-and-discussion)
+11. [Limitations and Improvements](#limitations-and-improvements)
+12. [Conclusion](#conclusion)
+13. [References](#references)
 
 ---
 
-## 🧠 Concept
+## Introduction
 
-### What is a Seam?
+Traditional image resizing techniques such as uniform scaling treat all pixels equally. As a result, important visual elements may become distorted when an image is resized.
 
-A **vertical seam** is a connected path of pixels:
+Seam Carving is a content-aware image resizing algorithm introduced by Avidan and Shamir (2007). Instead of removing entire rows or columns, the algorithm removes connected paths of pixels with the lowest visual importance.
 
-\[
-S = \{(x_y, y) \mid y = 0,1,\dots,H-1\}
-\]
+This method is widely used in computer graphics applications, including Adobe Photoshop's *Content-Aware Scaling* feature.
 
-with the constraint:
-
-\[
-|x_y - x_{y-1}| \le 1
-\]
-
-Each seam contains **exactly one pixel per row**.
-
-The optimal seam minimizes total energy:
-
-\[
-E(S) = \sum_{y=0}^{H-1} E(x_y, y)
-\]
+The objective of this project is to implement the Seam Carving algorithm and demonstrate how graph theory and shortest-path algorithms can be applied to image processing.
 
 ---
 
-## ⚡ Energy Map
+## Problem Definition
 
-### Energy Meaning
+Given an image of height *H* and width *W*, the goal is to reduce its width while preserving the most important visual structures.
 
-- **High energy** → edges, contours, textures  
-- **Low energy** → sky, walls, flat regions  
+A **vertical seam** is defined as a connected path of pixels:
 
-The algorithm preferentially removes **low-energy pixels**.
+```
+S = {(x_y, y) | y = 0, 1, ..., H-1}
+```
 
-### Energy Formula
+subject to:
 
-\[
-E(x,y) =
-\left| \frac{\partial I}{\partial x} \right|
-+
-\left| \frac{\partial I}{\partial y} \right|
-\]
+```
+|x_y - x_{y-1}| ≤ 1
+```
 
-Finite differences are used to approximate image gradients.
+Each seam contains exactly one pixel per image row.
 
----
+The optimal seam is the one minimizing the total energy:
 
-## 🗺️ Graph Representation
-
-The image is modeled as a **Directed Acyclic Graph (DAG)**:
-
-- Each pixel → node  
-- Each node connects to three pixels in the next row:
-
-(x−1, y+1)
-(x, y+1)
-(x+1, y+1)
-
-
-- Edge weight = energy of destination pixel  
-
-Because edges only go downward, the graph is **acyclic**.
+```
+E(S) = Σ E(x_y, y) for y = 0 to H-1
+```
 
 ---
 
-## 🔍 Shortest Path Interpretation
+## Energy Map
 
-Finding the optimal seam is equivalent to:
+### Energy Concept
 
-> **Finding the shortest path from the top row to the bottom row of the DAG**
+The importance of a pixel is measured using an energy function.
 
-Since the graph is acyclic, the shortest path can be solved efficiently using **dynamic programming**.
+- **High energy:** edges, contours, textures
+- **Low energy:** sky, walls, flat regions
+
+### Energy Computation
+
+The energy is computed from the image gradient:
+
+```
+E(x,y) = |∂I/∂x| + |∂I/∂y|
+```
+
+In practice, the derivatives are approximated using finite differences.
+
+**Figure 1:** Energy map obtained using image gradients for a bird image
+
+**Figure 2:** Energy map obtained using image gradients for a giraffe image
 
 ---
 
-## 🧮 Dynamic Programming
+## Graph Representation
 
-Let:
+The image is modeled as a directed acyclic graph (DAG).
 
-\[
-M(x,y)
-\]
+### Graph Construction
 
-be the minimum cumulative energy to reach pixel \((x,y)\).
+- Each pixel (x,y) represents a node.
+- Directed edges connect a pixel to its three neighbors in the next row: (x-1, y+1), (x, y+1), (x+1, y+1)
+- The weight of each edge is the energy of the destination pixel.
 
-\[
-M(x,y) = E(x,y) +
-\min
-\begin{cases}
-M(x-1,y-1) \\
-M(x,y-1) \\
-M(x+1,y-1)
-\end{cases}
-\]
+### Acyclic Property
+
+Edges only go from row *y* to row *y+1*, therefore cycles are impossible. The graph is naturally a DAG.
+
+---
+
+## Shortest Path Formulation
+
+Finding the optimal seam is equivalent to finding the shortest path from the top row to the bottom row of the DAG.
+
+Because the graph is acyclic, the shortest path can be computed efficiently using dynamic programming following the topological order of rows.
+
+---
+
+## Dynamic Programming Approach
+
+Let M(x,y) be the minimum cumulative energy required to reach pixel (x,y).
+
+```
+M(x,y) = E(x,y) + min(M(x-1, y-1), M(x, y-1), M(x+1, y-1))
+```
 
 ### Algorithm Steps
 
-1. Convert image to grayscale  
-2. Compute energy map  
-3. Initialize first row  
-4. Fill cumulative matrix row by row  
-5. Find minimum energy in last row  
-6. Backtrack to extract seam  
+1. Compute the energy map.
+2. Initialize the first row of M.
+3. Fill the matrix row by row.
+4. Find the minimum value in the last row.
+5. Backtrack to extract the seam.
+
+### Code Extract
+
+```python
+# Dynamic programming computation
+M[y, x] = energy[y, x] + min(
+    M[y-1, x-1],
+    M[y-1, x],
+    M[y-1, x+1]
+)
+```
 
 ---
 
-## 🧵 Seam Extraction
+## Seam Extraction
 
-After computing the cumulative energy matrix:
+Once the cumulative matrix is computed, the seam is obtained by backtracking from the minimum-energy pixel in the last row.
 
-- Start from the minimum value in the last row  
-- Backtrack using stored parent indices  
-- Obtain one pixel per row  
+**Figure 3:** Minimal-energy seam highlighted in red of the bird image
 
-The seam can be visualized by drawing it in **red**.
+**Figure 4:** Minimal-energy seam highlighted in red of the giraffe image
 
 ---
 
-## ✂️ Seam Removal
+## Seam Removal
 
-Once identified:
+After identifying the seam, one pixel per row is removed. This reduces the image width by exactly one pixel.
 
-- One pixel per row is removed  
-- Image width decreases by exactly one pixel  
-- Process is repeated until the desired width is reached  
+**Figure 5:** Before and after seam carving of a bird image
+- Original image (left)
+- After seam carving (right)
 
-### Example Results
+**Figure 6:** Before and after seam carving of a giraffe image
+- Original image (left)
+- After seam carving (right)
 
-| Original | After Seam Carving |
-|--------|-------------------|
-| ![](before.jpg) | ![](after.jpg) |
-
-| Original | After Seam Carving |
-|--------|-------------------|
-| ![](original1.jpg) | ![](after1.jpg) |
+The process can be repeated multiple times to achieve the desired width.
 
 ---
 
-## ⏱️ Complexity Analysis
+## Complexity Analysis
 
-For removing **one seam**:
+For removing a single seam:
 
-| Step | Complexity |
-|------|-----------|
-| Energy computation | O(HW) |
-| Dynamic programming | O(HW) |
-| Seam removal | O(HW) |
+- Energy computation: O(HW)
+- Dynamic programming: O(HW)
+- Seam removal: O(HW)
 
-Removing **k seams**:
+Removing *k* seams has complexity:
 
-\[
+```
 O(kHW)
-\]
+```
 
-Memory complexity:
+Memory complexity is:
 
-\[
+```
 O(HW)
-\]
+```
 
 ---
 
-## 🧪 Results
+## Results and Discussion
 
-The results show that:
+The results demonstrate that Seam Carving preserves important visual content such as objects and edges, unlike classical scaling methods.
 
-- Important objects are preserved
-- Background regions are preferentially removed
-- Distortion is significantly reduced compared to classical scaling
-
-Seam carving adapts the image structure instead of resizing it uniformly.
+The algorithm effectively removes pixels from low-energy regions, allowing content-aware resizing.
 
 ---
 
-## ⚠️ Limitations
+## Limitations and Improvements
 
-- Repeated seam removal may introduce artifacts  
-- Computational cost increases for large images  
-- Straight seams may distort regular patterns  
+**Limitations:**
+- Repeated seam removal may introduce artifacts.
+- Computational cost is high for large images.
 
----
-
-## 🚀 Possible Improvements
-
-- Forward Energy computation  
-- Object / face detection masks  
-- Parallelization (NumPy / GPU)  
-- Horizontal seam carving  
-- Seam insertion (image enlargement)
+**Possible improvements:**
+- Forward Energy computation
+- Face detection and protection masks
 
 ---
 
-## 🖥️ Streamlit Application
+## Conclusion
 
-An interactive interface was built using **Streamlit**:
+Seam Carving is a powerful example of how graph theory concepts can be applied to image processing.
 
-Features:
+By modeling an image as a directed acyclic graph and computing the shortest path, the algorithm resizes images while preserving important content.
 
-- Image upload  
-- Adjustable target width  
-- Energy map visualization  
-- Seam overlay visualization  
-- Before / after comparison  
-- Download resized image  
+This project highlights the strong relationship between:
 
-Launch locally:
+- Graph theory
+- Dynamic programming
+- Computer vision
 
-```bash
-streamlit run app.py
+---
+
+## References
+
+- Avidan, S., Shamir, A. (2007). Seam Carving for Content-Aware Image Resizing.
+- Adobe Photoshop Documentation.
