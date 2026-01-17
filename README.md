@@ -73,9 +73,11 @@ $$E(x,y) = \left| \frac{\partial I}{\partial x} \right| + \left| \frac{\partial 
 
 In practice, the derivatives are approximated using finite differences.
 
-**Figure 1:** Energy map obtained using image gradients for a bird image
+![Energy map for bird image](energy_map.png)
+*Figure 1: Energy map obtained using image gradients for a bird image*
 
-**Figure 2:** Energy map obtained using image gradients for a giraffe image
+![Energy map for giraffe image](energy_map1.png)
+*Figure 2: Energy map obtained using image gradients for a giraffe image*
 
 ---
 
@@ -137,9 +139,11 @@ M[y, x] = energy[y, x] + min(
 
 Once the cumulative matrix is computed, the seam is obtained by backtracking from the minimum-energy pixel in the last row.
 
-**Figure 3:** Minimal-energy seam highlighted in red of the bird image
+![Seam on bird image](seam.png)
+*Figure 3: Minimal-energy seam highlighted in red of the bird image*
 
-**Figure 4:** Minimal-energy seam highlighted in red of the giraffe image
+![Seam on giraffe image](seam1.png)
+*Figure 4: Minimal-energy seam highlighted in red of the giraffe image*
 
 ---
 
@@ -147,13 +151,17 @@ Once the cumulative matrix is computed, the seam is obtained by backtracking fro
 
 After identifying the seam, one pixel per row is removed. This reduces the image width by exactly one pixel.
 
-**Figure 5:** Before and after seam carving of a bird image
-- Original image (left)
-- After seam carving (right)
+| Original | After Seam Carving |
+|----------|-------------------|
+| ![Original bird](before.jpg) | ![After bird](after.jpg) |
 
-**Figure 6:** Before and after seam carving of a giraffe image
-- Original image (left)
-- After seam carving (right)
+*Figure 5: Before and after seam carving of a bird image*
+
+| Original | After Seam Carving |
+|----------|-------------------|
+| ![Original giraffe](original1.jpg) | ![After giraffe](after1.jpg) |
+
+*Figure 6: Before and after seam carving of a giraffe image*
 
 The process can be repeated multiple times to achieve the desired width.
 
