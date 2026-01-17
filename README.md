@@ -153,7 +153,7 @@ After identifying the seam, one pixel per row is removed. This reduces the image
 
 | Original | After Seam Carving |
 |----------|-------------------|
-| ![Original bird](before.jpg) | ![After bird](after.jpg) |
+| ![Original bird](original.jpg) | ![After bird](after.jpg) |
 
 *Figure 5: Before and after seam carving of a bird image*
 
